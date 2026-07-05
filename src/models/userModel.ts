@@ -1,7 +1,9 @@
 import { Schema, Document, model } from "mongoose";
 import validator from "validator";
+import jwt from "jsonwebtoken";
+import bcrypt from "bcrypt";
 
-interface IUser extends Document {
+export interface IUser extends Document {
   firstName: string;
   lastName: string;
   email: string;
@@ -11,6 +13,8 @@ interface IUser extends Document {
   photoURL?: string;
   about?: string;
   skills?: string[];
+  getJWTToken(): string;
+  isPasswordValid(sentPassword: string): Promise<boolean>;
 }
 
 const userSchema: Schema<IUser> = new Schema<IUser>(
@@ -64,5 +68,20 @@ const userSchema: Schema<IUser> = new Schema<IUser>(
   },
   { timestamps: true },
 );
+
+userSchema.methods.getJWTToken = function (this: IUser) {
+  const user = this;
+  const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET as string);
+  return token;
+};
+
+userSchema.methods.isPasswordValid = async function (
+  this: IUser,
+  sentPassword: string,
+) {
+  const user = this;
+  const isValid = await bcrypt.compare(sentPassword, user.password);
+  return isValid;
+};
 
 export const UserModel = model<IUser>("User", userSchema);
