@@ -81,16 +81,28 @@ userRouter.get("/feed", authMiddleware, async (req, res) => {
         { _id: { $nin: Array.from(hiddenUsers) } },
         { _id: { $ne: loggedInUser._id } },
       ],
-      ...(loggedInUser.gender
-        ? { gender: { $ne: loggedInUser.gender } }
-        : {}),
+      ...(loggedInUser.gender ? { gender: { $ne: loggedInUser.gender } } : {}),
     })
       .select(safeDataString)
+      .sort({ _id: 1 })
       .skip(skipCount)
       .limit(limit);
 
     res.send(users);
-  } catch (error) {}
+  } catch (error: any) {
+    res.status(400).json({ message: error.message || "Something went wrong." });
+  }
+});
+
+userRouter.get("/allusers", async (req, res) => {
+  try {
+    const allUsers = await UserModel.find({});
+    return res.json(allUsers);
+  } catch (error: any) {
+    return res
+      .status(400)
+      .json({ message: error.message || "Something went wrong" });
+  }
 });
 
 export default userRouter;

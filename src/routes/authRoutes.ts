@@ -41,7 +41,10 @@ authRouter.post("/login", async (req, res) => {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
       });
-      return res.json({ message: "user logged in successfully" });
+      return res.json({
+        message: "user logged in successfully",
+        user,
+      });
     } else throw new Error("Invalid Credentials.");
   } catch (err: any) {
     console.log(err.message);

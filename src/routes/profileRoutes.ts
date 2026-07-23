@@ -28,7 +28,7 @@ profileRouter.patch("/profile/edit", authMiddleware, async (req, res) => {
       user.set(editItem, req.body[editItem]);
     });
     await user.save();
-    res.send("Profile updated successfully.");
+    res.json({ message: "Profile updated successfully", user });
   } catch (error: any) {
     console.log(error.message);
     res.status(400).send("Error : " + error.message);

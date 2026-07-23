@@ -14,14 +14,15 @@ export const authMiddleware = async (
     const cookies = req.cookies;
     const { token } = cookies;
 
-    if (!token) throw new Error("Invalid Token.");
+    if (!token) throw new Error("Token not found. Login again.");
     const decoded = jwt.verify(token, process.env.JWT_SECRET as string);
     const { _id } = decoded as { _id: string };
     const user = await UserModel.findById(_id);
     if (!user) throw new Error("Something went wrong.");
     req.user = user;
     next();
-  } catch (error) {
+  } catch (error: any) {
+    console.log(error.message);
     res.status(401).json({ message: "Unauthorized" });
   }
 };
